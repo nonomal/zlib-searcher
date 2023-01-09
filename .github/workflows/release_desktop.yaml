@@ -1,6 +1,8 @@
-name: Build Desktop Test
+name: Release Desktop
 
-on: [workflow_dispatch]
+on:
+  release:
+    types: [published]
 
 jobs:
   build_desktop:
@@ -58,12 +60,14 @@ jobs:
       - uses: tauri-apps/tauri-action@v0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - name: Archive Bundles File
-        uses: actions/upload-artifact@v3
+      - name: Upload Github Assets
+        uses: softprops/action-gh-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          name: book-searcher-desktop-${{ runner.os }}
-          path: |
+          files:  |
             target/release/bundle/dmg/*.dmg
             target/release/bundle/appimage/*.AppImage
             target/release/bundle/deb/*.deb
             target/release/bundle/msi/*.msi
+          prerelease: ${{ contains(github.ref, '-') }}
